@@ -9,7 +9,7 @@ class ServerWorker:
 	PLAY = 'PLAY'
 	PAUSE = 'PAUSE'
 	TEARDOWN = 'TEARDOWN'
-	
+	RESTART = 'RESTART'
 	INIT = 0
 	READY = 1
 	PLAYING = 2
@@ -35,7 +35,7 @@ class ServerWorker:
 			if data:
 				print("Data received:\n" + data.decode("utf-8"))
 				self.processRtspRequest(data.decode("utf-8"))
-	
+
 	def processRtspRequest(self, data):
 		"""Process RTSP request sent from the client."""
 		# Get the request type
@@ -85,7 +85,14 @@ class ServerWorker:
 				self.clientInfo['event'] = threading.Event()
 				self.clientInfo['worker']= threading.Thread(target=self.sendRtp) 
 				self.clientInfo['worker'].start()
-		
+		elif requestType==self.RESTART:
+			try:
+				self.clientInfo['videoStream'] = VideoStream(filename)
+				self.state = self.READY
+			except IOError:
+				self.replyRtsp(self.FILE_NOT_FOUND_404, seq[1])
+			self.clientInfo['event'].set()
+			self.replyRtsp(self.OK_200, seq[1])
 		# Process PAUSE request
 		elif requestType == self.PAUSE:
 			if self.state == self.PLAYING:
