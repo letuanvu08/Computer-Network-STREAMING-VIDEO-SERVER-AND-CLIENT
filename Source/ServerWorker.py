@@ -9,8 +9,9 @@ class ServerWorker:
 	PLAY = 'PLAY'
 	PAUSE = 'PAUSE'
 	TEARDOWN = 'TEARDOWN'
-	DESCRIPTION = 'DESCRIPTION'
+	DESCRIBE = 'DESCRIBE'
 	STOP = 'STOP'
+	
 	INIT = 0
 	READY = 1
 	PLAYING = 2
@@ -118,6 +119,17 @@ class ServerWorker:
 			except IOError:
 				self.replyRtsp(self.FILE_NOT_FOUND_404, seq[1])
 			self.replyRtsp(self.OK_200, seq[1])
+		# Process DESCRIBE request
+		elif requestType == self.DESCRIBE:
+			print("processing DESCRIBE\n")
+			description = "Stream:\nEncoding: UTF-8"
+			try:
+				# send data
+				#...
+				self.replyRtsp(self.OK_200, seq[1], description)
+			except:
+				print("Connection Error!")
+				
 	def sendRtp(self):
 		"""Send RTP packets over UDP."""
 		while True:
@@ -162,6 +174,8 @@ class ServerWorker:
 		if code == self.OK_200:
 			#print("200 OK")
 			reply = 'RTSP/1.0 200 OK\nCSeq: ' + seq + '\nSession: ' + str(self.clientInfo['session'])
+			if description:
+				reply = reply + f'\n{description}'
 			connSocket = self.clientInfo['rtspSocket'][0]
 			connSocket.send(reply.encode())
 
