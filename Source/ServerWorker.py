@@ -169,7 +169,7 @@ class ServerWorker:
 
 		return rtpPacket.getPacket()
 
-	def replyRtsp(self, code, seq):
+	def replyRtsp(self, code, seq, description=None):
 		"""Send RTSP reply to the client."""
 		if code == self.OK_200:
 			#print("200 OK")
