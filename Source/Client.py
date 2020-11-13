@@ -60,10 +60,10 @@ class Client:
 		# self.teardown["text"] = "Teardown"
 		# self.teardown["command"] =  self.exitClient
 		# self.teardown.grid(row=1, column=2, padx=2, pady=2)
-		self.Stop = Button(self.master, width=20, padx=3, pady=3)
-		self.Stop["text"] = "Stop"
-		self.Stop["command"] =  self.StopStream
-		self.Stop.grid(row=1, column=2, padx=2, pady=2)
+		self.stop = Button(self.master, width=20, padx=3, pady=3)
+		self.stop["text"] = "Stop"
+		self.stop["command"] =  self.stopStream
+		self.stop.grid(row=1, column=2, padx=2, pady=2)
 
 
 		# Create a label to display the movie
@@ -80,7 +80,7 @@ class Client:
 		"""Describe button handler."""
 		self.sendRtspRequest(self.DESCRIBE)
 		
-	def StopStream(self):
+	def stopStream(self):
 		"""Stop button handler."""
 		self.sendRtspRequest(self.STOP)
 	def exitClient(self):
