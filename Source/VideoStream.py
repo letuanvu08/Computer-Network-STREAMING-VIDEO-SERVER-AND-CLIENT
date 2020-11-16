@@ -1,3 +1,4 @@
+
 class VideoStream:
 	def __init__(self, filename):
 		self.filename = filename
@@ -10,11 +11,13 @@ class VideoStream:
 	def nextFrame(self):
 		"""Get next frame."""
 		data = self.file.read(5) # Get the framelength from the first 5 bits
-		if data: 
+		if data:
+
 			framelength = int(data)
 							
 			# Read the current frame
 			data = self.file.read(framelength)
+			print(data)
 			self.frameNum += 1
 		return data
 		
