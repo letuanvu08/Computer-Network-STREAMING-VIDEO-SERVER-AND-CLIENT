@@ -2,9 +2,8 @@ from tkinter import *
 import tkinter.messagebox
 from PIL import Image, ImageTk
 import socket, threading, sys, traceback, os
-
 from RtpPacket import RtpPacket
-
+from time import time
 CACHE_FILE_NAME = "cache-"
 CACHE_FILE_EXT = ".jpg"
 
@@ -36,8 +35,10 @@ class Client:
 		self.teardownAcked = 0
 		self.connectToServer()
 		self.frameNbr = 0
-		self.stopAcked=0
-		self.ratelost=0
+		self.numberFrameRec=0
+		self.numberFrameLos=0
+		self.dataSize = 0
+		self.videoTime = 0
 	def createWidgets(self):
 		"""Build GUI."""
 		# Create Setup button
@@ -108,28 +109,26 @@ class Client:
 
 	def listenRtp(self):
 		"""Listen for RTP packets."""
-		self.numberFramgeRec=0
-		self.numberFramgeLos=0
 		while True:
 			try:
 				data = self.rtpSocket.recv(20480)
 				if data:
 					rtpPacket = RtpPacket()
 					rtpPacket.decode(data)
-					self.numberFramgeRec+=1
+					self.numberFrameRec+=1
 					currFrameNbr = rtpPacket.seqNum()
 					print("Current Seq Num: " + str(currFrameNbr))
-
 					if currFrameNbr > self.frameNbr:# Discard the late packet
 						if currFrameNbr -self.frameNbr>1:
-							self.numberFramgeLos=currFrameNbr -self.frameNbr-1
+							self.numberFrameLos+=currFrameNbr -self.frameNbr-1
 						self.frameNbr = currFrameNbr
+						self.dataSize += len(rtpPacket.getPayload())
 						self.updateMovie(self.writeFrame(rtpPacket.getPayload()))
-					if self.numberFramgeRec!=0:
-						print(f"RTP packet loss rate:{self.numberFramgeLos/(self.numberFramgeLos+self.numberFramgeRec)}")
+
 			except:
 				# Stop listening upon requesting PAUSE or TEARDOWN
 				if self.playEvent.isSet():
+					self.videoTime += time() - self.startTime
 					break
 
 				# Upon receiving ACK for TEARDOWN request,
@@ -271,12 +270,14 @@ class Client:
 						x.start()
 						self.playEvent.clear()
 
-						self.sendRtspRequest(self.PLAY)
+
 						# Open RTP port.
 						self.openRtpPort()
+						self.sendRtspRequest(self.PLAY)
 					elif self.requestSent == self.PLAY:
 						# self.state = ...
 						self.state=self.PLAYING
+						self.startTime = time()
 
 					elif self.requestSent == self.PAUSE:
 						# self.state = ...
@@ -289,6 +290,10 @@ class Client:
 						# self.state = ...
 						# Flag the teardownAcked to close the socket.
 						self.teardownAcked = 1
+						if self.numberFrameRec != 0:
+							print(f"RTP packet loss rate:{self.numberFrameLos / (self.numberFrameLos + self.numberFrameRec)}")
+							print(f"Video data rate:{self.dataSize / self.videoTime * 8 / 1000} Mbps")
+							print(f"Frame rate:{self.numberFrameRec / self.videoTime} fps")
 					elif self.requestSent==self.STOP:
 						self.playEvent.set()
 						self.state = self.READY
