@@ -80,6 +80,8 @@ class Client:
 	def describeMedia(self):
 		"""Describe button handler."""
 		self.sendRtspRequest(self.DESCRIBE)
+		tkinter.messagebox.showinfo(title="Description info", message="Media description is stored to ./description.txt")
+
 		
 	def StopStream(self):
 		"""Stop button handler."""

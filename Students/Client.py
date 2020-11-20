@@ -190,7 +190,7 @@ class Client:
 			# request = ...
 			request = f"TEARDOWN {self.fileName} RTSP/1.0\nCSeq: {self.rtspSeq}\nSession: {self.sessionId}"
 			# Keep track of the sent request.
-			# self.requestSent = ...
+			# self.requestSent = ...;
 			self.requestSent = self.TEARDOWN
 		else:
 			return

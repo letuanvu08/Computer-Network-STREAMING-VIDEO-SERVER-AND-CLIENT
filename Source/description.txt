@@ -1,1 +1,1 @@
-Stream:Encoding: UTF-8
+Stream:Video Encoding: RTP

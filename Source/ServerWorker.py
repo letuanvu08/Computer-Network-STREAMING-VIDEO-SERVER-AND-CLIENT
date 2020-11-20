@@ -122,7 +122,7 @@ class ServerWorker:
 		# Process DESCRIBE request
 		elif requestType == self.DESCRIBE:
 			print("processing DESCRIBE\n")
-			description = "Stream:\nEncoding: UTF-8"
+			description = "Stream: Video \nEncoding: RTP"
 			try:
 				# send data
 				#...
